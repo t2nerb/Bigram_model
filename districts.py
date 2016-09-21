@@ -31,9 +31,10 @@ def ml_mean(values):
     There are many libraries that do this, but do not use any functions
     outside core Python (sum and len are fine).
     """
-
+    
     # Your code here
-    return 0.5
+    samplemean = sum(x for x in values) / len(values) 
+    return samplemean 
 
 def ml_variance(values, mean):
     """
@@ -46,7 +47,8 @@ def ml_variance(values, mean):
     """
 
     # Your code here
-    return 1.0
+    svariance = sum((x - mean)**2 for x in values) / len(values) 
+    return svariance 
 
 def log_probability(value, mean, variance):
     """
@@ -55,6 +57,7 @@ def log_probability(value, mean, variance):
     """
 
     # Your code here
+
     return 0.0
 
 def republican_share(lines, states):
