@@ -4,7 +4,7 @@
 
 from csv import DictReader
 from collections import defaultdict
-from math import log
+from math import log, exp
 from math import pi as kPI
 
 kOBAMA = set(["D.C.", "Hawaii", "Vermont", "New York", "Rhode Island",
@@ -57,8 +57,10 @@ def log_probability(value, mean, variance):
     """
 
     # Your code here
+    const = 1 / (2*kPI*variance)**0.5
+    ex = exp(-(value - mean)**2 / (2*variance**2))
 
-    return 0.0
+    return log(const * ex) 
 
 def republican_share(lines, states):
     """
