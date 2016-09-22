@@ -55,14 +55,32 @@ def all_state_rows(lines, state):
 ############################ MY HELPERS ###############################
 
 def ml_mean(values):
+    """
+    Given a list of values assumed to come from a normal distribution,
+    return the maximum likelihood estimate of mean of that distribution.
+    There are many libraries that do this, but do not use any functions
+    outside core Python (sum and len are fine).
+    """
     samplemean = sum(x for x in values) / len(values) 
     return samplemean 
 
 def ml_variance(values, mean):
+    """
+    Given a list of values assumed to come from a normal distribution and
+    their maximum likelihood estimate of the mean, compute the maximum
+    likelihood estimate of the distribution's variance of those values.
+    There are many libraries that do something like this, but they
+    likely don't do exactly what you want, so you should not use them
+    directly.  (And to be clear, you're not allowed to use them.)
+    """
     svariance = sum((x - mean)**2 for x in values) / len(values) 
     return svariance 
 
 def log_probability(value, mean, variance):
+	"""
+	Given a Gaussian distribution with a given mean and variance, compute
+	the log probability of a value from that distribution.
+	"""
 	if variance == 0:
 		return 0
 	else:
@@ -71,6 +89,10 @@ def log_probability(value, mean, variance):
 		return log(const * ex) 
 
 def republican_share(lines, states):
+	"""
+	Return an iterator over the Republican share of the vote in all
+	districts in the states provided.
+	"""
 	adict = {}
 	for state in set(x["STATE"] for x in lines):
 		if state in states:
