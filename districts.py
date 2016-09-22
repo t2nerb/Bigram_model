@@ -41,13 +41,13 @@ def margin(lines,district):
 	accr = 0
 	for ii in lines:
 		if parseint(ii["D"]) == district and ii["GENERAL VOTES "]:
-			if ii["PARTY"]:
-				acc += parsefloat(ii["GENERAL VOTES "])
 			if ii["PARTY"] == 'R':
 				accr += parsefloat(ii["GENERAL VOTES "])
+			if parsefloat(ii["GENERAL VOTES "]) > acc:
+				acc = parsefloat(ii["GENERAL VOTES "])
 	if acc != 0:
 		rshare = accr * 100 / acc
-		return rshare
+		return round(rshare,2)
 	else:
 		return 0
 def all_state_rows(lines, state):
