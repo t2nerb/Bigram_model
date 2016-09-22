@@ -21,32 +21,44 @@ kROMNEY = set(["North Carolina", "Georgia", "Arizona", "Missouri", "Indiana",
 
 def valid(row):
     return sum(ord(y) for y in row['FEC ID#'][2:4])!=173 or int(row['1']) < 3583
+############################ MY HELPERS ###############################
+def parsefloat(val):
+	try:
+		if val != None:
+			return float(val[:-1].replace(",", "."))
+	except ValueError or TypeError:
+		return 0
 
+def parseint(val):
+	try:
+		if val:
+			return int(val[:2])
+	except ValueError or TypeError:
+		return 0
 
+def margin(lines,district):
+	acc = 0
+	accr = 0
+	for ii in lines:
+		if parseint(ii["D"]) == district and ii["GENERAL VOTES "]:
+			if ii["PARTY"]:
+				acc += parsefloat(ii["GENERAL VOTES "])
+			if ii["PARTY"] == 'R':
+				accr += parsefloat(ii["GENERAL VOTES "])
+	if acc != 0:
+		rshare = accr * 100 / acc
+		return rshare
+	else:
+		return 0
+def all_state_rows(lines, state):
+	return [x for x in lines if x["STATE"] == state]
+############################ MY HELPERS ###############################
 
 def ml_mean(values):
-    """
-    Given a list of values assumed to come from a normal distribution,
-    return the maximum likelihood estimate of mean of that distribution.
-    There are many libraries that do this, but do not use any functions
-    outside core Python (sum and len are fine).
-    """
-    
-    # Your code here
     samplemean = sum(x for x in values) / len(values) 
     return samplemean 
 
 def ml_variance(values, mean):
-    """
-    Given a list of values assumed to come from a normal distribution and
-    their maximum likelihood estimate of the mean, compute the maximum
-    likelihood estimate of the distribution's variance of those values.
-    There are many libraries that do something like this, but they
-    likely don't do exactly what you want, so you should not use them
-    directly.  (And to be clear, you're not allowed to use them.)
-    """
-
-    # Your code here
     svariance = sum((x - mean)**2 for x in values) / len(values) 
     return svariance 
 
@@ -56,16 +68,17 @@ def log_probability(value, mean, variance):
 	else:
 		const = 1 / (2*kPI*variance)**0.5
 		ex = exp(-(value - mean)**2 / (2*variance**2))
-
 		return log(const * ex) 
 
 def republican_share(lines, states):
-    """
-    Return an iterator over the Republican share of the vote in all
-    districts in the states provided.
-    """
-    # Your code here
-    return {("Alaska", 0): 50.97}
+	adict = {}
+	for state in set(x["STATE"] for x in lines):
+		if state in states:
+			srows = all_state_rows(lines,state)
+			for x in srows:
+				if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
+					adict[(state, parseint(x["D"]))] = margin(srows,parseint(x["D"]))
+	return adict
 
 if __name__ == "__main__":
     # Don't modify this code
