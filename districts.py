@@ -51,16 +51,13 @@ def ml_variance(values, mean):
     return svariance 
 
 def log_probability(value, mean, variance):
-    """
-    Given a normal distribution with a given mean and varience, compute the
-    log probability of a value from that distribution.
-    """
+	if variance == 0:
+		return 0
+	else:
+		const = 1 / (2*kPI*variance)**0.5
+		ex = exp(-(value - mean)**2 / (2*variance**2))
 
-    # Your code here
-    const = 1 / (2*kPI*variance)**0.5
-    ex = exp(-(value - mean)**2 / (2*variance**2))
-
-    return log(const * ex) 
+		return log(const * ex) 
 
 def republican_share(lines, states):
     """
