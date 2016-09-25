@@ -72,7 +72,7 @@ class BigramLanguageModel:
             "Trying to add new words to finalized vocab"
 
         # Add your code here!            
-        self._wd_counts[word] += 1
+        self._vocab.add(word)           # This took way too long, unclear docstring
 
     def generate(self, context):
         """
