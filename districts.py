@@ -23,35 +23,25 @@ def valid(row):
     return sum(ord(y) for y in row['FEC ID#'][2:4])!=173 or int(row['1']) < 3583
 ############################ MY HELPERS ###############################
 def parsefloat(val):
-	try:
-		if val != None:
-			return float(val[:-1].replace(",", "."))
-	except ValueError or TypeError:
-		return 0
-
+    try:
+        if val != None:
+            return float(val[:-1].replace(",", "."))
+    except ValueError or TypeError:
+        return 0
 def parseint(val):
-	try:
-		if val:
-			return int(val[:2])
-	except ValueError or TypeError:
-		return 0
-
-def margin(lines,district):
-	acc = 0
-	accr = 0
-	for ii in lines:
-		if parseint(ii["D"]) == district and ii["GENERAL VOTES "]:
-			if ii["PARTY"] == 'R':
-				accr += parsefloat(ii["GENERAL VOTES "])
-			if parsefloat(ii["GENERAL VOTES "]) > acc:
-				acc = parsefloat(ii["GENERAL VOTES "])
-	if acc != 0:
-		rshare = accr * 100 / acc
-		return round(rshare,2)
-	else:
-		return 0
+    try:
+        if val: return int(val[:2])
+    except ValueError or TypeError:
+        return 0
+def repub_share(lines,district):
+    accr = 0
+    for ii in lines:
+        if parseint(ii["D"]) == district and ii["GENERAL %"]:
+            if ii["PARTY"] == 'R':
+                accr += parsefloat(ii["GENERAL %"])
+    return accr
 def all_state_rows(lines, state):
-	return [x for x in lines if x["STATE"] == state]
+    return [x for x in lines if x["STATE"] == state]
 ############################ MY HELPERS ###############################
 
 def ml_mean(values):
@@ -82,11 +72,11 @@ def log_probability(value, mean, variance):
 	the log probability of a value from that distribution.
 	"""
 	if variance == 0:
-		return 0
+            return 0
 	else:
-		const = 1 / (2*kPI*variance)**0.5
-		ex = exp(-(value - mean)**2 / (2*variance**2))
-		return log(const * ex) 
+            const = 1 / (2*kPI*variance)**0.5
+            ex = exp(-(value - mean)**2 / (2*variance**2))
+            return log(const * ex) 
 
 def republican_share(lines, states):
 	"""
@@ -95,11 +85,11 @@ def republican_share(lines, states):
 	"""
 	adict = {}
 	for state in set(x["STATE"] for x in lines):
-		if state in states:
-			srows = all_state_rows(lines,state)
-			for x in srows:
-				if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
-					adict[(state, parseint(x["D"]))] = margin(srows,parseint(x["D"]))
+            if state in states:
+                srows = all_state_rows(lines,state)
+                for x in srows:
+                    if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
+                        adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
 	return adict
 
 if __name__ == "__main__":
