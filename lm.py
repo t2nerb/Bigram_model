@@ -61,7 +61,7 @@ class BigramLanguageModel:
         # Add your code here!
         # Bigram counts
         self._vocab_final = False
-        self._wd_counts = Counter()
+        self._wd_counts = defaultdict(Counter)
 
     def train_seen(self, word):
         """
@@ -158,9 +158,10 @@ class BigramLanguageModel:
         # You'll need to complete this function, but here's a line of code that
         # will hopefully get you started.
         for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
-            None
             # ---------------------------------------
             assert word in self._vocab, "%s not in vocab" % word
+            self._wd_counts[context][word] += 1
+
 
     def log_likelihood(self, sentence):
         """

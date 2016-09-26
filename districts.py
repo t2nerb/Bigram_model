@@ -4,7 +4,7 @@
 
 from csv import DictReader
 from collections import defaultdict
-from math import log, exp
+from math import log, exp, sqrt
 from math import pi as kPI
 
 kOBAMA = set(["D.C.", "Hawaii", "Vermont", "New York", "Rhode Island",
@@ -51,7 +51,7 @@ def ml_mean(values):
     There are many libraries that do this, but do not use any functions
     outside core Python (sum and len are fine).
     """
-    samplemean = sum(x for x in values) / len(values) 
+    samplemean = sum(values) / len(values) 
     return samplemean 
 
 def ml_variance(values, mean):
@@ -63,34 +63,37 @@ def ml_variance(values, mean):
     likely don't do exactly what you want, so you should not use them
     directly.  (And to be clear, you're not allowed to use them.)
     """
+
     svariance = sum((x - mean)**2 for x in values) / len(values) 
     return svariance 
 
 def log_probability(value, mean, variance):
-	"""
-	Given a Gaussian distribution with a given mean and variance, compute
-	the log probability of a value from that distribution.
-	"""
-	if variance == 0:
-            return 0
-	else:
-            const = 1 / (2*kPI*variance)**0.5
-            ex = exp(-(value - mean)**2 / (2*variance**2))
-            return log(const * ex) 
+    """
+    Given a Gaussian distribution with a given mean and variance, compute
+    the log probability of a value from that distribution.
+    """     
+
+    if variance == 0:
+        return 0
+    else:
+        const = 1 / (2*kPI*variance)**0.5
+        ex = exp(-(value - mean)**2 / (2*variance))
+        return log(const * ex) 
 
 def republican_share(lines, states):
-	"""
-	Return an iterator over the Republican share of the vote in all
-	districts in the states provided.
-	"""
-	adict = {}
-	for state in set(x["STATE"] for x in lines):
-            if state in states:
-                srows = all_state_rows(lines,state)
-                for x in srows:
-                    if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
-                        adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
-	return adict
+    """
+    Return an iterator over the Republican share of the vote in all
+    districts in the states provided.
+    """
+
+    adict = defaultdict(float)
+    for state in set(x["STATE"] for x in lines):
+        if state in states:
+            srows = all_state_rows(lines,state)
+            for x in srows:
+                if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
+                    adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
+    return adict
 
 if __name__ == "__main__":
     # Don't modify this code
