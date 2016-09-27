@@ -85,7 +85,7 @@ class BigramLanguageModel:
         # smoothing "+1" term while sampling.
 
         # Your code here
-        return "the"
+        return "likely"
             
     def sample(self, sample_size):
         """
@@ -174,14 +174,13 @@ class BigramLanguageModel:
         """
         alist = []
         tokens = 0
-        """
-        for context, word in bigrams(self.tokenize_and_censor(sentence)):
-            alist.append(laplace(context, word))
+        prob = 1
+        for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
+            prob *= self.laplace(context, word)
             tokens += 1
-        l_likelihood = log(sum(alist)) / tokens
+        l_likelihood = prob / tokens
         return l_likelihood
-        """
-        return 0
+        #return 0
 
 
 if __name__ == "__main__":
