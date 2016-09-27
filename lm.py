@@ -61,7 +61,7 @@ class BigramLanguageModel:
         # Add your code here!
         # Bigram counts
         self._vocab_final = False
-        self._wd_counts = defaultdict(Counter)
+        self._obs_counts = defaultdict(Counter)     #I added this back in myself
 
     def train_seen(self, word):
         """
@@ -147,8 +147,12 @@ class BigramLanguageModel:
         assert word in self._vocab, "%s not in vocab" % word
 
         # Add your code here
-        val = 0.0
-        return val
+        #val = 0.0
+        word_ct = self._obs_counts[context][word] 
+        context_ct = 0
+        context_ct += sum(self._obs_counts[context].values())
+        slaplace = (word_ct + 1) / (context_ct + len(self._vocab)) 
+        return log(slaplace)
 
     def add_train(self, sentence):
         """
@@ -160,7 +164,7 @@ class BigramLanguageModel:
         for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
             # ---------------------------------------
             assert word in self._vocab, "%s not in vocab" % word
-            self._wd_counts[context][word] += 1
+            self._obs_counts[context][word] += 1
 
 
     def log_likelihood(self, sentence):
@@ -168,8 +172,16 @@ class BigramLanguageModel:
         Compute the log likelihood of a sentence, divided by the number of
         tokens in the sentence.
         """
-        
-        return 0.0
+        alist = []
+        tokens = 0
+        """
+        for context, word in bigrams(self.tokenize_and_censor(sentence)):
+            alist.append(laplace(context, word))
+            tokens += 1
+        l_likelihood = log(sum(alist)) / tokens
+        return l_likelihood
+        """
+        return 0
 
 
 if __name__ == "__main__":
