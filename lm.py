@@ -103,13 +103,14 @@ class BigramLanguageModel:
 
         # Your code here
         chosen = ''
-        prob = 0
+        prob = -10000000000000000
         total = sum(self._obs_counts[context].values())
         for item in self._obs_counts[context]:
-            wd_prob = self._obs_counts[context][item] / total
-            if wd_prob > prob:
-                chosen = item
-                prob = wd_prob
+            if item != "</s>" and len(item) > 1:
+                wd_prob = self.laplace(context,item)
+                if wd_prob > prob:
+                    chosen = item
+                    prob = wd_prob
             
 
         return chosen
@@ -204,9 +205,9 @@ class BigramLanguageModel:
         tokens = 0
         prob = 1
         for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
-            prob *= self.laplace(context, word)
+            prob *= exp(self.laplace(context, word))
             tokens += 1
-        l_likelihood = prob / tokens
+        l_likelihood = log(prob) / tokens
         return l_likelihood
         #return 0
 
@@ -273,5 +274,7 @@ if __name__ == "__main__":
             #if word is not in model trained by all presidents
             if item not in all_lm._vocab:
                 obama_uniqwd.add(item) 
-        for item in rep_lm.sample(20):
+        for item in dem_lm.sample(20):
+            print(item)
+        for item in obama_lm.sample(10):
             print(item)
