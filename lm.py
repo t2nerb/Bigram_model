@@ -11,6 +11,22 @@ kEND = "</s>"
 kWORDS = re.compile("[a-z]{1,}")
 kREP = set(["Bush", "GWBush", "Eisenhower", "Ford", "Nixon", "Reagan"])
 kDEM = set(["Carter", "Clinton", "Truman", "Johnson", "Kennedy"])
+############## MY HELPER FOR WRITE UP ########################
+def all_sentences(zip_file):
+    """
+    Given a zip file, yield an iterator over the lines in each file in the
+    zip file.
+    """
+    with ZipFile(zip_file) as z:
+        for ii in z.namelist():
+            try:
+                pres = ii.replace(".txt", "").replace("state_union/", "").split("-")[1]
+            except IndexError:
+                continue
+
+            for jj in z.read(ii).decode(errors='replace').split("\n")[3:]:
+                yield jj.lower()
+########## END MY HELPER FOR WRITE UP ########################
 
 class OutOfVocab(Exception):
     def __init__(self, value):
@@ -62,6 +78,7 @@ class BigramLanguageModel:
         # Bigram counts
         self._vocab_final = False
         self._obs_counts = defaultdict(Counter)     #I added this back in myself
+        self._bigrams = set()
 
     def train_seen(self, word):
         """
@@ -85,7 +102,17 @@ class BigramLanguageModel:
         # smoothing "+1" term while sampling.
 
         # Your code here
-        return "likely"
+        chosen = ''
+        prob = 0
+        total = sum(self._obs_counts[context].values())
+        for item in self._obs_counts[context]:
+            wd_prob = self._obs_counts[context][item] / total
+            if wd_prob > prob:
+                chosen = item
+                prob = wd_prob
+            
+
+        return chosen
             
     def sample(self, sample_size):
         """
@@ -165,6 +192,7 @@ class BigramLanguageModel:
             # ---------------------------------------
             assert word in self._vocab, "%s not in vocab" % word
             self._obs_counts[context][word] += 1
+            self._bigrams.add((context, word))
 
 
     def log_likelihood(self, sentence):
@@ -213,4 +241,37 @@ if __name__ == "__main__":
             except OutOfVocab:
                 None
             
-            
+############## Code for write-up and sentence generation #######################################################
+
+    all_lm = BigramLanguageModel()      #LangModel to be trained on president's speeches
+    for sent in all_sentences("../data/state_union.zip"):
+        for ww in tokenize(sent):
+            all_lm.train_seen(ww)
+        all_lm.add_train(sent)
+    all_lm.finalize()
+
+    obama_lm = BigramLanguageModel()    #LangModel to be trained on obama's speech
+    with open("../data/2016-obama.txt") as infile:
+        for ii in infile:
+            for ww in tokenize(ii):
+                obama_lm.train_seen(ww)
+            obama_lm.add_train(ii)
+        obama_lm.finalize() 
+
+        #sets to hold unique words and bigrams of obama
+        obama_uniqbg = set()
+        obama_uniqwd = set()
+
+        #for every bigram in obama's bigrams
+        for item in obama_lm._bigrams:
+            #if bigram not seen by model trained by all presidents
+            if item not in all_lm._bigrams:
+                obama_uniqbg.add(item)
+
+        #for every word in obama's _vocab
+        for item in obama_lm._vocab:
+            #if word is not in model trained by all presidents
+            if item not in all_lm._vocab:
+                obama_uniqwd.add(item) 
+        for item in rep_lm.sample(20):
+            print(item)
