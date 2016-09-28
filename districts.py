@@ -110,8 +110,20 @@ if __name__ == "__main__":
 
     colorado = republican_share(lines, ["Colorado"])
     print("\t\tObama\t\tRomney\n" + "=" * 80)
+    obama_ch = 0
+    romney_ch = 0
     for co, dist in colorado:
         obama_prob = log_probability(colorado[(co, dist)], obama_mean, obama_var)
         romney_prob = log_probability(colorado[(co, dist)], romney_mean, romney_var)
 
+        #accumulators for chance at winning (write-up)
+        obama_ch += obama_prob
+        romney_ch += romney_prob
+
         print("District %i\t%f\t%f" % (dist, obama_prob, romney_prob))
+
+    ###################### CODE FOR WRITE UP ###########################
+    if obama_ch > romney_ch:
+        print("Obama won")
+    if romney_ch > obama_ch:
+        print("Romney won")
