@@ -6,6 +6,8 @@ from csv import DictReader
 from collections import defaultdict
 from math import log, exp, sqrt
 from math import pi as kPI
+import numpy as np
+import matplotlib.pyplot as plt
 
 kOBAMA = set(["D.C.", "Hawaii", "Vermont", "New York", "Rhode Island",
               "Maryland", "California", "Massachusetts", "Delaware", "New Jersey",
@@ -23,16 +25,22 @@ def valid(row):
     return sum(ord(y) for y in row['FEC ID#'][2:4])!=173 or int(row['1']) < 3583
 ############################ MY HELPERS ###############################
 def parsefloat(val):
+    """
     try:
         if val != None:
-            return float(val[:-1].replace(",", "."))
+            return float(val.replace(",", ".").replace("%",""))
     except ValueError or TypeError:
         return 0
+    """
+    return float(val.replace(",", ".").replace("%",""))
 def parseint(val):
+    """
     try:
         if val: return int(val[:2])
     except ValueError or TypeError:
         return 0
+    """
+    return int(val[:2])
 def repub_share(lines,district):
     accr = 0
     for ii in lines:
@@ -85,15 +93,31 @@ def republican_share(lines, states):
     Return an iterator over the Republican share of the vote in all
     districts in the states provided.
     """
-
+    #This code works provided there is MORE than 1 republican candidate per district
     adict = defaultdict(float)
+    """
     for state in set(x["STATE"] for x in lines):
         if state in states:
             srows = all_state_rows(lines,state)
             for x in srows:
-                if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
-                    adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
+                try:
+                    if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
+                        adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
+                except ValueError or TypeError:
+                    continue
     return adict
+    """
+
+    for state in states:
+        for ll in lines:
+            try:
+                if ll["PARTY"] == 'R' and ll["GENERAL VOTES "] and ll["D"] and ll["D"][5:] != "UNEXPIRED TERM" and ll["STATE"] == state:
+                    percent = parsefloat(ll["GENERAL %"])
+                    district = parseint(ll["D"])
+                    adict[(state, district)] = percent 
+            except ValueError:
+                continue
+    return adict 
 
 if __name__ == "__main__":
     # Don't modify this code
@@ -127,3 +151,31 @@ if __name__ == "__main__":
         print("Obama won")
     if romney_ch > obama_ch:
         print("Romney won")
+
+    rshare = []
+    for state in set(x["STATE"] for x in lines):
+        something = republican_share(lines, [state])
+        for ii in something.values():
+            rshare.append(ii)
+    """
+    for state in kROMNEY:
+        somethign = republican_share(lines, [state])
+        for ii in something.values():
+            rshare.append(ii)
+    """
+
+    #CODE FOR HISTOGRAM
+    print(len(rshare))
+    binlist = []
+    for i in range(0,22):
+        binlist.append(i*5)
+    print(binlist)
+
+    #plt.hist(rshare, [0,10,20,30,40,50,60,70,80,90,100])
+    plt.hist(rshare, binlist)
+    plt.title("Histogram of republican_share in state districts", fontsize=18)
+    plt.xlabel('Republican share (%)', fontsize=14)
+    plt.ylabel('Frequency', fontsize = 14)
+    plt.ylim([0,80])
+    plt.savefig('histogram.png')
+    plt.show()
