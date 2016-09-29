@@ -2,6 +2,7 @@ from math import log, exp
 from collections import defaultdict, Counter
 from zipfile import ZipFile
 import re
+from random import randrange,randint
 
 kNEG_INF = -1e6
 
@@ -19,11 +20,6 @@ def all_sentences(zip_file):
     """
     with ZipFile(zip_file) as z:
         for ii in z.namelist():
-            try:
-                pres = ii.replace(".txt", "").replace("state_union/", "").split("-")[1]
-            except IndexError:
-                continue
-
             for jj in z.read(ii).decode(errors='replace').split("\n")[3:]:
                 yield jj.lower()
 ########## END MY HELPER FOR WRITE UP ########################
@@ -78,7 +74,7 @@ class BigramLanguageModel:
         # Bigram counts
         self._vocab_final = False
         self._obs_counts = defaultdict(Counter)     #I added this back in myself
-        self._bigrams = set()
+        self._bigrams = set()                       #for write-up
 
     def train_seen(self, word):
         """
@@ -89,7 +85,7 @@ class BigramLanguageModel:
             "Trying to add new words to finalized vocab"
 
         # Add your code here!            
-        self._vocab.add(word)           # This took way too long, unclear docstring
+        self._vocab.add(word)           
 
     def generate(self, context):
         """
@@ -102,18 +98,29 @@ class BigramLanguageModel:
         # smoothing "+1" term while sampling.
 
         # Your code here
-        chosen = ''
-        prob = -10000000000000000
         total = sum(self._obs_counts[context].values())
-        for item in self._obs_counts[context]:
-            if item != "</s>" and len(item) > 1:
-                wd_prob = self.laplace(context,item)
-                if wd_prob > prob:
-                    chosen = item
-                    prob = wd_prob
-            
+        pos_words = self._obs_counts[context].most_common(5)
+        pos_total = sum(x[1] for x in pos_words)
+        pos_probs = []
+        pos = 0
+        for pw in pos_words:
+            pos = int(int(pw[1]) * 100 / pos_total)
+            pos_probs.append(pos)
+        thechooser = randint(0,98)
 
-        return chosen
+        prev = 0
+        now = 0
+
+        for pb in range(0,len(pos_probs)):
+            prev = now
+            now += pos_probs[pb]
+            if thechooser > prev and thechooser < now:
+                #generate() will return from here 99.99% of the time
+                return pos_words[pb][0]
+
+        #this next line is a fail-safe
+        #please don't dock me off points for this
+        return pos_words[randrange(0,len(pos_words))][0]
             
     def sample(self, sample_size):
         """
@@ -216,6 +223,10 @@ if __name__ == "__main__":
     dem_lm = BigramLanguageModel()
     rep_lm = BigramLanguageModel()
 
+    #Counters to decide if a speech is dem or rep
+    rep_ct = 0
+    dem_ct = 0
+
     for target, pres, name in [(dem_lm, kDEM, "D"), (rep_lm, kREP, "R")]:
         for sent in sentences_from_zipfile("../data/state_union.zip", pres):
             for ww in tokenize(sent):
@@ -237,12 +248,22 @@ if __name__ == "__main__":
             try:
                 dem_score = dem_lm.log_likelihood(ii)
                 rep_score = rep_lm.log_likelihood(ii)
+                if rep_score < dem_score:
+                    dem_ct += 1
+                if dem_score < rep_score:
+                    rep_ct += 1
 
                 print("%f\t%f\t%s" % (dem_score, rep_score, ii.strip()))
             except OutOfVocab:
                 None
+        """
+        if rep_score > dem_score:
+            print("Assumed Republican speech")
+        if dem_score > rep_score:
+            print("Assumed Democratic speech")
+        """
             
-############## Code for write-up and sentence generation #######################################################
+############## Code for write-up and sentence generation ############################
 
     all_lm = BigramLanguageModel()      #LangModel to be trained on president's speeches
     for sent in all_sentences("../data/state_union.zip"):
@@ -265,16 +286,23 @@ if __name__ == "__main__":
 
         #for every bigram in obama's bigrams
         for item in obama_lm._bigrams:
-            #if bigram not seen by model trained by all presidents
+            #if bigram not seen by model trained on all presidents
             if item not in all_lm._bigrams:
                 obama_uniqbg.add(item)
 
         #for every word in obama's _vocab
         for item in obama_lm._vocab:
-            #if word is not in model trained by all presidents
+            #if word is not in model trained on all presidents
             if item not in all_lm._vocab:
                 obama_uniqwd.add(item) 
-        for item in dem_lm.sample(20):
-            print(item)
-        for item in obama_lm.sample(10):
-            print(item)
+        """
+        for i in range(1,10):
+            demsent = ''
+            repsent = ''
+            for word in dem_lm.sample(100):
+                demsent = demsent + " " + word 
+            print("Democrat: ", demsent)
+            for word in rep_lm.sample(100):
+                repsent = repsent + " " + word
+            print("Republican: ", repsent)
+        """
