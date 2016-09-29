@@ -25,21 +25,8 @@ def valid(row):
     return sum(ord(y) for y in row['FEC ID#'][2:4])!=173 or int(row['1']) < 3583
 ############################ MY HELPERS ###############################
 def parsefloat(val):
-    """
-    try:
-        if val != None:
-            return float(val.replace(",", ".").replace("%",""))
-    except ValueError or TypeError:
-        return 0
-    """
     return float(val.replace(",", ".").replace("%",""))
 def parseint(val):
-    """
-    try:
-        if val: return int(val[:2])
-    except ValueError or TypeError:
-        return 0
-    """
     return int(val[:2])
 def repub_share(lines,district):
     accr = 0
@@ -95,18 +82,6 @@ def republican_share(lines, states):
     """
     #This code works provided there is MORE than 1 republican candidate per district
     adict = defaultdict(float)
-    """
-    for state in set(x["STATE"] for x in lines):
-        if state in states:
-            srows = all_state_rows(lines,state)
-            for x in srows:
-                try:
-                    if x["D"] and x["D"] != 'H' and x["D"][5:] != "UNEXPIRED TERM":
-                        adict[(state, parseint(x["D"]))] = repub_share(srows,parseint(x["D"]))
-                except ValueError or TypeError:
-                    continue
-    return adict
-    """
 
     for state in states:
         for ll in lines:
@@ -147,6 +122,7 @@ if __name__ == "__main__":
         print("District %i\t%f\t%f" % (dist, obama_prob, romney_prob))
 
     ###################### CODE FOR WRITE UP ###########################
+    """
     if obama_ch > romney_ch:
         print("Obama won")
     if romney_ch > obama_ch:
@@ -157,12 +133,10 @@ if __name__ == "__main__":
         something = republican_share(lines, [state])
         for ii in something.values():
             rshare.append(ii)
-    """
     for state in kROMNEY:
         somethign = republican_share(lines, [state])
         for ii in something.values():
             rshare.append(ii)
-    """
 
     #CODE FOR HISTOGRAM
     print(len(rshare))
@@ -179,3 +153,4 @@ if __name__ == "__main__":
     plt.ylim([0,80])
     plt.savefig('histogram.png')
     plt.show()
+    """
