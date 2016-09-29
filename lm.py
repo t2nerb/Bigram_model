@@ -209,11 +209,11 @@ class BigramLanguageModel:
         tokens in the sentence.
         """
         alist = []
-        tokens = 0
+        tokens = 1
         prob = 1
         for context, word in bigrams(list(self.tokenize_and_censor(sentence))):
             prob *= exp(self.laplace(context, word))
-            tokens += 1
+            tokens += 1 
         l_likelihood = log(prob) / tokens
         return l_likelihood
         #return 0
