@@ -228,14 +228,14 @@ if __name__ == "__main__":
     dem_ct = 0
 
     for target, pres, name in [(dem_lm, kDEM, "D"), (rep_lm, kREP, "R")]:
-        for sent in sentences_from_zipfile("../data/state_union.zip", pres):
+        for sent in sentences_from_zipfile("data/state_union.zip", pres):
             for ww in tokenize(sent):
                 target.train_seen(ww)
                 
         print("Done looking at %s words, finalizing vocabulary" % name)
         target.finalize()
         
-        for sent in sentences_from_zipfile("../data/state_union.zip", pres):
+        for sent in sentences_from_zipfile("data/state_union.zip", pres):
             target.add_train(sent)
     
         print("Trained language model for %s" % name)
