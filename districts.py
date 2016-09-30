@@ -96,7 +96,7 @@ def republican_share(lines, states):
 
 if __name__ == "__main__":
     # Don't modify this code
-    lines = [x for x in DictReader(open("../data/2014_election_results.csv"))
+    lines = [x for x in DictReader(open("data/2014_election_results.csv"))
              if valid(x)]
 
     obama_mean = ml_mean(republican_share(lines, kOBAMA).values())
@@ -142,7 +142,6 @@ if __name__ == "__main__":
     """
 
     #CODE FOR HISTOGRAM
-    print(len(rshare))
     binlist = []
     for i in range(0,22):
         binlist.append(i*5)
