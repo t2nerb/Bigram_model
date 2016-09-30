@@ -86,6 +86,9 @@ class TestLanguageModel(unittest.TestCase):
         for ii in range(10000):
             lm.add_train("likely")
 
+        for ii in range(200):
+            lm.add_train("unlikely")
+
         count = Counter()
         for ii in range(100):
             sent = list(lm.sample(1))
