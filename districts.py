@@ -127,23 +127,25 @@ if __name__ == "__main__":
         print("Obama won")
     if romney_ch > obama_ch:
         print("Romney won")
+    """
 
     rshare = []
     for state in set(x["STATE"] for x in lines):
         something = republican_share(lines, [state])
         for ii in something.values():
             rshare.append(ii)
+    """
     for state in kROMNEY:
-        somethign = republican_share(lines, [state])
+        something = republican_share(lines, [state])
         for ii in something.values():
             rshare.append(ii)
+    """
 
     #CODE FOR HISTOGRAM
     print(len(rshare))
     binlist = []
     for i in range(0,22):
         binlist.append(i*5)
-    print(binlist)
 
     #plt.hist(rshare, [0,10,20,30,40,50,60,70,80,90,100])
     plt.hist(rshare, binlist)
@@ -151,6 +153,5 @@ if __name__ == "__main__":
     plt.xlabel('Republican share (%)', fontsize=14)
     plt.ylabel('Frequency', fontsize = 14)
     plt.ylim([0,80])
-    plt.savefig('histogram.png')
+    #plt.savefig('histogram.png')
     plt.show()
-    """

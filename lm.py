@@ -295,8 +295,7 @@ if __name__ == "__main__":
             #if word is not in model trained on all presidents
             if item not in all_lm._vocab:
                 obama_uniqwd.add(item) 
-        """
-        for i in range(1,10):
+        for i in range(1,100):
             demsent = ''
             repsent = ''
             for word in dem_lm.sample(100):
@@ -305,4 +304,3 @@ if __name__ == "__main__":
             for word in rep_lm.sample(100):
                 repsent = repsent + " " + word
             print("Republican: ", repsent)
-        """
